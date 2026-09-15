@@ -6,62 +6,55 @@
 
 Архітектура розроблена за чотирирівневою моделлю IoT з виділеним рівнем Fog Computing для забезпечення локальної автономності об'єкта.
 
-```mermaid
 flowchart TD
-    %% Рівень 4: Застосунки
-    subgraph L4["Рівень 4: Застосунки (Application Layer)"]
+    subgraph L4[Рівень 4: Застосунки]
         direction TB
-        AppWeb["Веб-панель агронома (Grafana / React)"]
-        AppMobile["Мобільний застосунок моніторингу (Flutter)"]
-        AlertService["Сервіс екстрених сповіщень (Telegram / SMS)"]
+        AppWeb[Веб-панель агронома]
+        AppMobile[Мобільний застосунок]
+        AlertService[Сервіс сповіщень Telegram]
     end
 
-    %% Рівень 3: Обробка даних
-    subgraph L3["Рівень 3: Обробка даних (Processing / Cloud & Fog)"]
+    subgraph L3[Рівень 3: Обробка даних]
         direction TB
-        subgraph CloudProcessing["Хмара (AWS / Хмарний брокер)"]
-            CloudDB[("База часових рядів (InfluxDB)")]
-            Analytics["Предиктивна аналітика врожайності"]
+        subgraph CloudProcessing[Хмара]
+            CloudDB[(База часових рядів)]
+            Analytics[Аналітика врожайності]
         end
-        subgraph FogProcessing["Локальний шлюз (Raspberry Pi 5)"]
-            RuleEngine["Локальний рушій автоматизації (Node-RED)"]
-            LocalDB[("Кільцевий буфер (SQLite)")]
-            FailoverLogic["Модуль автономної логіки (Offline Mode)"]
+        subgraph FogProcessing[Локальний шлюз Raspberry Pi 5]
+            RuleEngine[Рушій автоматизації Node-RED]
+            LocalDB[(Локальний буфер SQLite)]
+            FailoverLogic[Модуль автономної логіки]
         end
     end
 
-    %% Рівень 2: Мережа
-    subgraph L2["Рівень 2: Мережа (Network Layer)"]
+    subgraph L2[Рівень 2: Мережа]
         direction TB
-        NetProtocols["Польові шини: RS-485 / Modbus RTU / Zigbee"]
-        TransportProtocols["Транспорт: MQTT через TLS / HTTPS"]
+        NetProtocols[RS-485 / Modbus RTU / Zigbee]
+        TransportProtocols[MQTT через TLS / HTTPS]
     end
 
-    %% Рівень 1: Сприйняття та дія
-    subgraph L1["Рівень 1: Сприйняття та дія (Perception & Actuation)"]
+    subgraph L1[Рівень 1: Сприйняття та дія]
         direction TB
-        subgraph Sensors["Датчики"]
-            S_TH["Датчики температури та вологості (SHT35)"]
-            S_Soil["Ємнісні датчики вологості ґрунту"]
-            S_Lux["Датчики рівня освітленості (BH1750)"]
-            S_CO2["Оптичні датчики концентрації CO2 (MH-Z19B)"]
+        subgraph Sensors[Датчики]
+            S_TH[Датчики темп. та вологості SHT35]
+            S_Soil[Ємнісні датчики вологості ґрунту]
+            S_Lux[Датчики освітленості BH1750]
+            S_CO2[Оптичні датчики CO2 MH-Z19B]
         end
-        subgraph Actuators["Виконавчі механізми"]
-            A_Valve["Електромагнітні клапани поливу"]
-            A_Vent["Сервоприводи кватирок і вентилятори"]
-            A_Light["LED-фітосвітильники досвітлення"]
-            A_Heat["Твердотільні реле нагрівальних контурів"]
+        subgraph Actuators[Виконавчі механізми]
+            A_Valve[Електромагнітні клапани поливу]
+            A_Vent[Сервоприводи кватирок і витяжки]
+            A_Light[LED-фітосвітильники]
+            A_Heat[Реле нагрівальних контурів]
         end
     end
 
-    %% Взаємодія між рівнями
     Sensors --> L2
     L2 --> FogProcessing
     RuleEngine --> Actuators
     FogProcessing --> CloudProcessing
     CloudProcessing --> L4
     FogProcessing -.-> AppWeb
-
 ## 2. Таблиця складу системи
 
 Теплиця площею 200 м² (розмір 10 × 20 м) розділена на 4 функціональні сектори для незалежного та точного контролю параметрів мікроклімату.
