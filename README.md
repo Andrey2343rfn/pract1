@@ -1,9 +1,3 @@
-# # Проєкт IoT-системи: Розумна теплиця (200 м²)
-
-## 1. Архітектурна діаграма системи (Mermaid)
-
-Архітектура побудована за класичною 4-рівневою моделлю IoT з виділеним рівнем туманних обчислень (Fog Computing) для локальної автономності.
-
 ```mermaid
 flowchart TD
     %% Рівень 4: Застосунки
@@ -11,51 +5,51 @@ flowchart TD
         direction TB
         AppWeb["Веб-дашборд агронома (Grafana / React)"]
         AppMobile["Мобільний застосунок керування (Flutter)"]
-        AlertService["Сервіс нотифікацій (Telegram / SMS Gateway)"]
+        AlertService["Сервіс нотифікацій (Telegram / SMS)"]
     end
 
     %% Рівень 3: Обробка даних
     subgraph L3["Рівень 3: Обробка даних (Processing / Cloud & Fog)"]
         direction TB
         subgraph CloudProcessing["Хмара (AWS / Cloud Broker)"]
-            CloudDB[(База часових рядів InfluxDB / PostgreSQL)]
-            Analytics["ML-аналітика врожайності та прогнозування"]
+            CloudDB[("База часових рядів (InfluxDB)")]
+            Analytics["ML-аналітика врожайності"]
         end
-        subgraph FogProcessing["Локальний шлюз (Fog Node - Raspberry Pi 5)"]
+        subgraph FogProcessing["Локальний шлюз (Raspberry Pi 5)"]
             RuleEngine["Локальний рушій правил (Node-RED)"]
-            LocalDB[(Локальний буфер SQLite / Telegraf)]
-            FailoverLogic["Модуль автономної логіки (Offline Fallback)"]
+            LocalDB[("Локальний буфер (SQLite)")]
+            FailoverLogic["Модуль автономної логіки"]
         end
     end
 
     %% Рівень 2: Мережа
     subgraph L2["Рівень 2: Мережа (Network Layer)"]
         direction TB
-        NetProtocols["RS-485 (Modbus RTU) / Zigbee 3.0 / Wi-Fi"]
-        TransportProtocols["MQTT через TLS (MQTTS) / HTTPS"]
+        NetProtocols["RS-485 / Zigbee 3.0 / Wi-Fi"]
+        TransportProtocols["MQTT через TLS / HTTPS"]
     end
 
     %% Рівень 1: Сприйняття та дія
     subgraph L1["Рівень 1: Сприйняття та дія (Perception & Actuation)"]
         direction TB
         subgraph Sensors["Датчики"]
-            S_TH["Датчики темп. та вологості повітря (DHT22 / SHT35)"]
-            S_Soil["Ємнісні датчики вологості ґрунту (Capacitive Soil)"]
+            S_TH["Датчики темп. та вологості (SHT35)"]
+            S_Soil["Ємнісні датчики вологості ґрунту"]
             S_Lux["Датчики освітленості (BH1750)"]
-            S_CO2["Оптичні датчики CO2 (MH-Z19B NDIR)"]
+            S_CO2["Оптичні датчики CO2 (MH-Z19B)"]
         end
         subgraph Actuators["Виконавчі механізми"]
-            A_Valve["Електромагнітні клапани крапельного поливу"]
-            A_Vent["Сервоприводи кватирок / витяжні вентилятори"]
-            A_Light["Фітосвітильники LED з ШІМ-димуванням"]
-            A_Heat["Твердотільні реле нагрівачів / контуру опалення"]
+            A_Valve["Електромагнітні клапани поливу"]
+            A_Vent["Сервоприводи кватирок / вентилятори"]
+            A_Light["LED-фітосвітильники"]
+            A_Heat["Реле контуру опалення"]
         end
     end
 
     %% Зв'язки між рівнями
-    Sensors -->|Modbus RTU / Zigbee| L2
-    L2 -->|Збір даних| FogProcessing
-    RuleEngine -->|Команди керування через L2| Actuators
-    FogProcessing -->|MQTT over TLS (Інтернет)| CloudProcessing
+    Sensors --> L2
+    L2 --> FogProcessing
+    RuleEngine --> Actuators
+    FogProcessing --> CloudProcessing
     CloudProcessing --> L4
-    FogProcessing -.->|Локальний Wi-Fi / fallback| AppWeb
+    FogProcessing -.-> AppWeb
