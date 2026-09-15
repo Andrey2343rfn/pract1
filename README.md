@@ -6,55 +6,50 @@
 
 Архітектура розроблена за чотирирівневою моделлю IoT з виділеним рівнем Fog Computing для забезпечення локальної автономності об'єкта.
 
-flowchart TD
-    subgraph L4[Рівень 4: Застосунки]
-        direction TB
-        AppWeb[Веб-панель агронома]
-        AppMobile[Мобільний застосунок]
-        AlertService[Сервіс сповіщень Telegram]
+```mermaid
+graph TD
+    subgraph L4["Рівень 4: Застосунки"]
+        AppWeb["Веб-панель агронома"]
+        AppMobile["Мобільний застосунок"]
+        Alerts["Сповіщення Telegram"]
     end
 
-    subgraph L3[Рівень 3: Обробка даних]
-        direction TB
-        subgraph CloudProcessing[Хмара]
-            CloudDB[(База часових рядів)]
-            Analytics[Аналітика врожайності]
+    subgraph L3["Рівень 3: Обробка даних"]
+        subgraph Cloud["Хмара"]
+            CloudDB[("База даних")]
+            Analytics["Аналітика"]
         end
-        subgraph FogProcessing[Локальний шлюз Raspberry Pi 5]
-            RuleEngine[Рушій автоматизації Node-RED]
-            LocalDB[(Локальний буфер SQLite)]
-            FailoverLogic[Модуль автономної логіки]
+        subgraph Fog["Локальний шлюз RPi 5"]
+            RuleEngine["Автоматика Node-RED"]
+            LocalDB[("Буфер SQLite")]
         end
     end
 
-    subgraph L2[Рівень 2: Мережа]
-        direction TB
-        NetProtocols[RS-485 / Modbus RTU / Zigbee]
-        TransportProtocols[MQTT через TLS / HTTPS]
+    subgraph L2["Рівень 2: Мережа"]
+        Net["RS-485 / Zigbee / MQTT"]
     end
 
-    subgraph L1[Рівень 1: Сприйняття та дія]
-        direction TB
-        subgraph Sensors[Датчики]
-            S_TH[Датчики темп. та вологості SHT35]
-            S_Soil[Ємнісні датчики вологості ґрунту]
-            S_Lux[Датчики освітленості BH1750]
-            S_CO2[Оптичні датчики CO2 MH-Z19B]
+    subgraph L1["Рівень 1: Сприйняття та дія"]
+        subgraph Sensors["Датчики"]
+            S1["Температура та вологість"]
+            S2["Вологість грунту"]
+            S3["Освітленість"]
+            S4["Концентрація CO2"]
         end
-        subgraph Actuators[Виконавчі механізми]
-            A_Valve[Електромагнітні клапани поливу]
-            A_Vent[Сервоприводи кватирок і витяжки]
-            A_Light[LED-фітосвітильники]
-            A_Heat[Реле нагрівальних контурів]
+        subgraph Actuators["Виконавчі механізми"]
+            A1["Клапани поливу"]
+            A2["Вентиляція та кватирки"]
+            A3["LED-освітлення"]
+            A4["Опалення"]
         end
     end
 
-    Sensors --> L2
-    L2 --> FogProcessing
+    Sensors --> Net
+    Net --> Fog
+    Fog --> Cloud
+    Cloud --> L4
     RuleEngine --> Actuators
-    FogProcessing --> CloudProcessing
-    CloudProcessing --> L4
-    FogProcessing -.-> AppWeb
+    Fog -.-> AppWeb
 ## 2. Таблиця складу системи
 
 Теплиця площею 200 м² (розмір 10 × 20 м) розділена на 4 функціональні сектори для незалежного та точного контролю параметрів мікроклімату.
